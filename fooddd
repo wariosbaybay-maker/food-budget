@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бюджет на продукты</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f4f6f8;
+    color: #1a1a1a;
+    padding: 20px;
+    line-height: 1.5;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; margin-bottom: 20px; }
+  h2 { font-size: 18px; margin: 20px 0 10px; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  label { display: block; font-size: 14px; margin-bottom: 6px; color: #555; }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  button {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover { background: #256428; }
+  button.danger { background: #c62828; }
+  button.danger:hover { background: #a02020; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 120px; }
+
+  .budget-bar {
+    height: 22px;
+    background: #e0e0e0;
+    border-radius: 11px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+  .budget-fill {
+    height: 100%;
+    background: #4caf50;
+    transition: width 0.3s;
+  }
+  .budget-fill.over { background: #c62828; }
+
+  .stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+  .stat { font-size: 14px; color: #555; }
+  .stat b { display: block; font-size: 20px; color: #1a1a1a; }
+
+  ul.products { list-style: none; }
+  ul.products li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+  }
+  ul.products li:last-child { border-bottom: none; }
+
+  .recipe {
+    background: #f9fafb;
+    border-left: 4px solid #4caf50;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+  }
+  .recipe b { display: block; margin-bottom: 4px; }
+  .recipe small { color: #666; }
+  .empty { color: #999; font-style: italic; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🛒 Бюджет на продукты</h1>
+
+  <!-- Бюджет и магазин -->
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Бюджет на неделю (₽)</label>
+        <input type="number" id="budget" placeholder="3000" value="3000">
+      </div>
+      <div>
+        <label>Магазин</label>
+        <select id="shop">
+          <option>Пятёрочка</option>
+          <option>Магнит</option>
+          <option>Лента</option>
+          <option>Перекрёсток</option>
+          <option>ВкусВилл</option>
+          <option>Самокат</option>
+          <option>Другой</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="saveSettings()">Сохранить</button>
+
+    <div class="budget-bar"><div class="budget-fill" id="bar" style="width:0%"></div></div>
+    <div class="stats">
+      <div class="stat">Бюджет<b id="s-budget">0 ₽</b></div>
+      <div class="stat">Потрачено<b id="s-spent">0 ₽</b></div>
+      <div class="stat">Осталось<b id="s-left">0 ₽</b></div>
+    </div>
+  </div>
+
+  <!-- Добавление продуктов -->
+  <div class="card">
+    <h2>Добавить продукт</h2>
+    <div class="row">
+      <input type="text" id="p-name" placeholder="Название (напр. Курица)">
+      <input type="number" id="p-price" placeholder="Цена, ₽">
+      <input type="text" id="p-qty" placeholder="Кол-во (напр. 1 кг)">
+    </div>
+    <button onclick="addProduct()">Добавить</button>
+  </div>
+
+  <!-- Список продуктов -->
+  <div class="card">
+    <h2>Корзина</h2>
+    <ul class="products" id="list"></ul>
+    <p class="empty" id="empty-msg">Пока пусто. Добавьте продукты.</p>
+  </div>
+
+  <!-- Рецепты -->
+  <div class="card">
+    <h2>Что можно приготовить</h2>
+    <div id="recipes"></div>
+  </div>
+</div>
+
+<script>
+  let products = [];
+  let budget = 3000;
+
+  // Загрузка из localStorage
+  function load() {
+    const saved = localStorage.getItem('foodBudget');
+    if (saved) {
+      const d = JSON.parse(saved);
+      products = d.products || [];
+      budget = d.budget || 3000;
+      document.getElementById('budget').value = budget;
+      document.getElementById('shop').value = d.shop || 'Пятёрочка';
+    }
+    render();
+  }
+
+  function saveSettings() {
+    budget = +document.getElementById('budget').value || 0;
+    save();
+    render();
+  }
+
+  function save() {
+    localStorage.setItem('foodBudget', JSON.stringify({
+      products, budget,
+      shop: document.getElementById('shop').value
+    }));
+  }
+
+  function addProduct() {
+    const name = document.getElementById('p-name').value.trim();
+    const price = +document.getElementById('p-price').value;
+    const qty = document.getElementById('p-qty').value.trim();
+    if (!name || !price) return alert('Введите название и цену');
+    products.push({ name, price, qty });
+    document.getElementById('p-name').value = '';
+    document.getElementById('p-price').value = '';
+    document.getElementById('p-qty').value = '';
+    save();
+    render();
+  }
+
+  function removeProduct(i) {
+    products.splice(i, 1);
+    save();
+    render();
+  }
+
+  function render() {
+    // Список
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+    products.forEach((p, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${p.name} ${p.qty ? '— ' + p.qty : ''}</span>
+        <span><b>${p.price} ₽</b>
+        <button class="danger" style="padding:4px 10px;font-size:13px;margin-left:8px"
+          onclick="removeProduct(${i})">✕</button></span>`;
+      list.appendChild(li);
+    });
+    document.getElementById('empty-msg').style.display = products.length ? 'none' : 'block';
+
+    // Бюджет
+    const spent = products.reduce((s, p) => s + p.price, 0);
+    const left = budget - spent;
+    const percent = budget ? Math.min(100, (spent / budget) * 100) : 0;
+
+    document.getElementById('s-budget').textContent = budget + ' ₽';
+    document.getElementById('s-spent').textContent = spent + ' ₽';
+    document.getElementById('s-left').textContent = left + ' ₽';
+    const bar = document.getElementById('bar');
+    bar.style.width = percent + '%';
+    bar.classList.toggle('over', spent > budget);
+
+    renderRecipes();
+  }
+
+  // Простые рецепты по ключевым словам
+  const RECIPES = [
+    { keys: ['курица','куриц','филе'], name: 'Курица с овощами', text: 'Обжарьте курицу, добавьте овощи, тушите 20 мин.' },
+    { keys: ['картош','картоф'], name: 'Жареная картошка', text: 'Нарежьте, обжарьте с луком до золотистой корочки.' },
+    { keys: ['макарон','паста','спагетт'], name: 'Паста с соусом', text: 'Отварите, добавьте томатный соус и сыр.' },
+    { keys: ['яйц','яйца'], name: 'Омлет', text: 'Взбейте яйца с молоком, обжарьте 5 мин.' },
+    { keys: ['рис'], name: 'Плов', text: 'Обжарьте мясо и морковь, добавьте рис и воду 1:2.' },
+    { keys: ['гречк','греча'], name: 'Гречка с грибами', text: 'Отварите гречку, обжарьте грибы с луком.' },
+    { keys: ['молок'], name: 'Молочная каша', text: 'Сварите крупу на молоке, добавьте сахар.' },
+    { keys: ['сыр'], name: 'Сырный суп', text: 'Обжарьте лук, добавьте бульон и плавленый сыр.' },
+    { keys: ['овощ','помидор','огур','перец','капуст'], name: 'Салат', text: 'Нарежьте овощи, заправьте маслом.' },
+    { keys: ['фарш'], name: 'Котлеты', text: 'Смешайте фарш с луком и яйцом, обжарьте.' },
+    { keys: ['хлеб','батон'], name: 'Гренки', text: 'Обжарьте хлеб на масле, посыпьте сыром.' },
+    { keys: ['рыб','минтай','треск'], name: 'Рыба в духовке', text: 'Посолите, поперчите, запекайте 25 мин при 200°C.' },
+  ];
+
+  function renderRecipes() {
+    const box = document.getElementById('recipes');
+    box.innerHTML = '';
+    if (!products.length) {
+      box.innerHTML = '<p class="empty">Добавьте продукты — появятся идеи рецептов.</p>';
+      return;
+    }
+    const names = products.map(p => p.name.toLowerCase());
+    const found = RECIPES.filter(r =>
+      names.some(n => r.keys.some(k => n.includes(k)))
+    );
+    if (!found.length) {
+      box.innerHTML = '<p class="empty">Пока нет совпадений. Добавьте крупы, мясо, овощи, яйца.</p>';
+      return;
+    }
+    found.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'recipe';
+      div.innerHTML = `<b>${r.name}</b><small>${r.text}</small>`;
+      box.appendChild(div);
+    });
+  }
+
+  load();
+</script>
+</body>
+</html>
