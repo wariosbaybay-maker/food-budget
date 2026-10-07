@@ -3,267 +3,292 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Бюджет на продукты</title>
+<title>Умный бюджет на продукты</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: #f4f6f8;
-    color: #1a1a1a;
-    padding: 20px;
-    line-height: 1.5;
+    background: #f4f6f8; color: #1a1a1a; padding: 20px; line-height: 1.5;
   }
   .container { max-width: 900px; margin: 0 auto; }
-  h1 { font-size: 26px; margin-bottom: 20px; }
+  h1 { font-size: 26px; margin-bottom: 6px; }
+  .sub { color: #666; margin-bottom: 20px; font-size: 14px; }
   h2 { font-size: 18px; margin: 20px 0 10px; }
   .card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: #fff; border-radius: 12px; padding: 20px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   label { display: block; font-size: 14px; margin-bottom: 6px; color: #555; }
   input, select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d0d7de;
-    border-radius: 8px;
-    font-size: 15px;
-    margin-bottom: 12px;
+    width: 100%; padding: 10px 12px; border: 1px solid #d0d7de;
+    border-radius: 8px; font-size: 15px; margin-bottom: 12px;
   }
   button {
-    background: #2e7d32;
-    color: #fff;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.2s;
+    background: #2e7d32; color: #fff; border: none;
+    padding: 12px 20px; border-radius: 8px; font-size: 15px;
+    cursor: pointer; transition: 0.2s; width: 100%;
   }
   button:hover { background: #256428; }
-  button.danger { background: #c62828; }
-  button.danger:hover { background: #a02020; }
   .row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .row > * { flex: 1; min-width: 120px; }
+  .row > * { flex: 1; min-width: 140px; }
 
   .budget-bar {
-    height: 22px;
-    background: #e0e0e0;
-    border-radius: 11px;
-    overflow: hidden;
-    margin: 10px 0;
+    height: 22px; background: #e0e0e0; border-radius: 11px;
+    overflow: hidden; margin: 10px 0;
   }
-  .budget-fill {
-    height: 100%;
-    background: #4caf50;
-    transition: width 0.3s;
-  }
-  .budget-fill.over { background: #c62828; }
-
+  .budget-fill { height: 100%; background: #4caf50; transition: width 0.3s; }
   .stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
   .stat { font-size: 14px; color: #555; }
   .stat b { display: block; font-size: 20px; color: #1a1a1a; }
 
   ul.products { list-style: none; }
   ul.products li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    font-size: 15px;
+    display: flex; justify-content: space-between; padding: 8px 0;
+    border-bottom: 1px solid #eee; font-size: 15px;
   }
   ul.products li:last-child { border-bottom: none; }
+  .cat { font-size: 12px; color: #999; margin-left: 6px; }
 
   .recipe {
-    background: #f9fafb;
-    border-left: 4px solid #4caf50;
-    padding: 10px 14px;
-    margin-bottom: 10px;
-    border-radius: 6px;
+    background: #f9fafb; border-left: 4px solid #4caf50;
+    padding: 12px 14px; margin-bottom: 10px; border-radius: 6px;
   }
   .recipe b { display: block; margin-bottom: 4px; }
-  .recipe small { color: #666; }
+  .recipe small { color: #666; display: block; margin-bottom: 6px; }
+  .recipe .ing { font-size: 13px; color: #444; }
   .empty { color: #999; font-style: italic; font-size: 14px; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>🛒 Бюджет на продукты</h1>
+  <h1>🛒 Умный бюджет на продукты</h1>
+  <p class="sub">Введи сумму и выбери магазин — сайт сам подберёт корзину и рецепты</p>
 
-  <!-- Бюджет и магазин -->
   <div class="card">
     <div class="row">
       <div>
         <label>Бюджет на неделю (₽)</label>
-        <input type="number" id="budget" placeholder="3000" value="3000">
+        <input type="number" id="budget" value="3000" step="100">
       </div>
       <div>
         <label>Магазин</label>
         <select id="shop">
-          <option>Пятёрочка</option>
-          <option>Магнит</option>
-          <option>Лента</option>
-          <option>Перекрёсток</option>
-          <option>ВкусВилл</option>
-          <option>Самокат</option>
-          <option>Другой</option>
+          <option value="pyaterochka">Пятёрочка</option>
+          <option value="magnit">Магнит</option>
+          <option value="lenta">Лента</option>
+          <option value="perekrestok">Перекрёсток</option>
         </select>
       </div>
     </div>
-    <button onclick="saveSettings()">Сохранить</button>
+    <button onclick="generate()">Подобрать корзину и рецепты</button>
+  </div>
 
+  <div class="card hidden" id="result">
+    <h2>Ваша корзина</h2>
     <div class="budget-bar"><div class="budget-fill" id="bar" style="width:0%"></div></div>
     <div class="stats">
       <div class="stat">Бюджет<b id="s-budget">0 ₽</b></div>
       <div class="stat">Потрачено<b id="s-spent">0 ₽</b></div>
       <div class="stat">Осталось<b id="s-left">0 ₽</b></div>
     </div>
+    <ul class="products" id="list" style="margin-top:14px"></ul>
   </div>
 
-  <!-- Добавление продуктов -->
-  <div class="card">
-    <h2>Добавить продукт</h2>
-    <div class="row">
-      <input type="text" id="p-name" placeholder="Название (напр. Курица)">
-      <input type="number" id="p-price" placeholder="Цена, ₽">
-      <input type="text" id="p-qty" placeholder="Кол-во (напр. 1 кг)">
-    </div>
-    <button onclick="addProduct()">Добавить</button>
-  </div>
-
-  <!-- Список продуктов -->
-  <div class="card">
-    <h2>Корзина</h2>
-    <ul class="products" id="list"></ul>
-    <p class="empty" id="empty-msg">Пока пусто. Добавьте продукты.</p>
-  </div>
-
-  <!-- Рецепты -->
-  <div class="card">
-    <h2>Что можно приготовить</h2>
+  <div class="card hidden" id="recipes-card">
+    <h2>🍳 Что приготовить на неделю</h2>
     <div id="recipes"></div>
   </div>
 </div>
 
 <script>
-  let products = [];
-  let budget = 3000;
+// ===== БАЗА ПРОДУКТОВ =====
+// Цены примерные. Можешь менять под свой регион.
+// shop: множитель цены для магазина (Пятёрочка = 1, Лента дешевле, Перекрёсток дороже)
+const SHOP_MULT = {
+  pyaterochka: 1.00,
+  magnit: 0.97,
+  lenta: 0.92,
+  perekrestok: 1.15
+};
 
-  // Загрузка из localStorage
-  function load() {
-    const saved = localStorage.getItem('foodBudget');
-    if (saved) {
-      const d = JSON.parse(saved);
-      products = d.products || [];
-      budget = d.budget || 3000;
-      document.getElementById('budget').value = budget;
-      document.getElementById('shop').value = d.shop || 'Пятёрочка';
+// priority: 1 = обязательно, 2 = важно, 3 = по остатку
+const PRODUCTS = [
+  // Белки
+  { name: 'Куриное филе', price: 320, qty: '1 кг', cat: 'мясо', priority: 1 },
+  { name: 'Куриные бёдра', price: 220, qty: '1 кг', cat: 'мясо', priority: 2 },
+  { name: 'Фарш свино-говяжий', price: 350, qty: '500 г', cat: 'мясо', priority: 2 },
+  { name: 'Яйца', price: 120, qty: '10 шт', cat: 'белок', priority: 1 },
+  { name: 'Минтай', price: 280, qty: '1 кг', cat: 'рыба', priority: 2 },
+  { name: 'Сосиски', price: 200, qty: '400 г', cat: 'мясо', priority: 3 },
+
+  // Крупы и макароны
+  { name: 'Рис', price: 90, qty: '1 кг', cat: 'крупа', priority: 1 },
+  { name: 'Гречка', price: 80, qty: '1 кг', cat: 'крупа', priority: 1 },
+  { name: 'Макароны', price: 90, qty: '500 г', cat: 'крупа', priority: 1 },
+  { name: 'Овсянка', price: 70, qty: '500 г', cat: 'крупа', priority: 2 },
+  { name: 'Картофель', price: 60, qty: '2 кг', cat: 'овощ', priority: 1 },
+
+  // Овощи
+  { name: 'Лук', price: 40, qty: '1 кг', cat: 'овощ', priority: 1 },
+  { name: 'Морковь', price: 45, qty: '1 кг', cat: 'овощ', priority: 1 },
+  { name: 'Помидоры', price: 180, qty: '1 кг', cat: 'овощ', priority: 2 },
+  { name: 'Огурцы', price: 120, qty: '500 г', cat: 'овощ', priority: 3 },
+  { name: 'Капуста', price: 50, qty: '1 кг', cat: 'овощ', priority: 2 },
+  { name: 'Перец болгарский', price: 150, qty: '500 г', cat: 'овощ', priority: 3 },
+
+  // Молочка
+  { name: 'Молоко', price: 80, qty: '1 л', cat: 'молочка', priority: 1 },
+  { name: 'Сыр', price: 250, qty: '300 г', cat: 'молочка', priority: 2 },
+  { name: 'Творог', price: 130, qty: '300 г', cat: 'молочка', priority: 2 },
+  { name: 'Сметана', price: 100, qty: '300 г', cat: 'молочка', priority: 2 },
+  { name: 'Масло сливочное', price: 180, qty: '200 г', cat: 'молочка', priority: 2 },
+
+  // Прочее
+  { name: 'Хлеб', price: 45, qty: '1 буханка', cat: 'прочее', priority: 1 },
+  { name: 'Масло растительное', price: 120, qty: '1 л', cat: 'прочее', priority: 1 },
+  { name: 'Чай', price: 100, qty: '25 пак.', cat: 'прочее', priority: 2 },
+  { name: 'Сахар', price: 70, qty: '1 кг', cat: 'прочее', priority: 2 },
+  { name: 'Соль', price: 20, qty: '1 кг', cat: 'прочее', priority: 1 },
+];
+
+// ===== РЕЦЕПТЫ =====
+// ingredients: ключевые слова, которые должны быть в корзине
+const RECIPES = [
+  {
+    name: 'Курица с картошкой в духовке',
+    ingredients: ['куриное филе', 'картофель', 'лук', 'морковь'],
+    text: 'Курицу и картошку нарежьте, посолите, добавьте лук и морковь. Запекайте 40 мин при 200°C.'
+  },
+  {
+    name: 'Макароны по-флотски',
+    ingredients: ['макароны', 'фарш', 'лук'],
+    text: 'Обжарьте фарш с луком, отварите макароны, смешайте.'
+  },
+  {
+    name: 'Гречка с курицей',
+    ingredients: ['гречка', 'куриные бёдра', 'лук', 'морковь'],
+    text: 'Обжарьте курицу с овощами, добавьте гречку и воду 1:2, тушите 25 мин.'
+  },
+  {
+    name: 'Омлет с сыром',
+    ingredients: ['яйца', 'молоко', 'сыр'],
+    text: 'Взбейте 3 яйца с молоком, вылейте на сковороду, посыпьте сыром, готовьте 5 мин.'
+  },
+  {
+    name: 'Плов',
+    ingredients: ['рис', 'куриное филе', 'лук', 'морковь'],
+    text: 'Обжарьте мясо и овощи, добавьте рис и воду 1:2, тушите 30 мин.'
+  },
+  {
+    name: 'Сырный суп',
+    ingredients: ['сыр', 'картофель', 'лук', 'морковь', 'сосиски'],
+    text: 'Сварите картошку, обжарьте лук и морковь, добавьте плавленый сыр и сосиски.'
+  },
+  {
+    name: 'Минтай в духовке',
+    ingredients: ['минтай', 'лук', 'морковь'],
+    text: 'Рыбу посолите, сверху лук и морковь, запекайте 25 мин при 200°C.'
+  },
+  {
+    name: 'Творожная запеканка',
+    ingredients: ['творог', 'яйца', 'сахар', 'сметана'],
+    text: 'Смешайте творог, яйца, сахар. Запекайте 30 мин при 180°C, подавайте со сметаной.'
+  },
+  {
+    name: 'Овсяная каша',
+    ingredients: ['овсянка', 'молоко', 'сахар'],
+    text: 'Сварите овсянку на молоке 5 мин, добавьте сахар и масло.'
+  },
+  {
+    name: 'Салат из помидоров и огурцов',
+    ingredients: ['помидоры', 'огурцы', 'лук'],
+    text: 'Нарежьте, посолите, заправьте маслом.'
+  },
+  {
+    name: 'Тушёная капуста',
+    ingredients: ['капуста', 'лук', 'морковь', 'сосиски'],
+    text: 'Обжарьте лук и морковь, добавьте капусту и сосиски, тушите 30 мин.'
+  },
+  {
+    name: 'Жареная картошка с луком',
+    ingredients: ['картофель', 'лук'],
+    text: 'Нарежьте картошку, обжарьте с луком до золотистой корочки.'
+  },
+];
+
+// ===== ЛОГИКА =====
+function generate() {
+  const budget = +document.getElementById('budget').value || 0;
+  const shop = document.getElementById('shop').value;
+  const mult = SHOP_MULT[shop] || 1;
+
+  if (budget < 500) return alert('Бюджет слишком маленький — минимум 500₽');
+
+  // Сортируем: сначала priority 1, потом 2, потом 3
+  const sorted = [...PRODUCTS].sort((a, b) => a.priority - b.priority);
+
+  // Набираем корзину
+  let spent = 0;
+  const basket = [];
+  for (const p of sorted) {
+    const price = Math.round(p.price * mult);
+    if (spent + price <= budget) {
+      basket.push({ ...p, price });
+      spent += price;
     }
-    render();
   }
 
-  function saveSettings() {
-    budget = +document.getElementById('budget').value || 0;
-    save();
-    render();
+  // Показываем результат
+  document.getElementById('result').classList.remove('hidden');
+  document.getElementById('recipes-card').classList.remove('hidden');
+
+  // Бюджет-бар
+  const percent = Math.min(100, (spent / budget) * 100);
+  document.getElementById('bar').style.width = percent + '%';
+  document.getElementById('s-budget').textContent = budget + ' ₽';
+  document.getElementById('s-spent').textContent = spent + ' ₽';
+  document.getElementById('s-left').textContent = (budget - spent) + ' ₽';
+
+  // Список продуктов
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  basket.forEach(p => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${p.name} <span class="cat">${p.qty}</span></span>
+      <b>${p.price} ₽</b>`;
+    list.appendChild(li);
+  });
+
+  // Рецепты — только те, у которых ВСЕ ингредиенты в корзине
+  const names = basket.map(p => p.name.toLowerCase());
+  const available = RECIPES.filter(r =>
+    r.ingredients.every(ing =>
+      names.some(n => n.includes(ing) || ing.includes(n))
+    )
+  );
+
+  const box = document.getElementById('recipes');
+  box.innerHTML = '';
+  if (!available.length) {
+    box.innerHTML = '<p class="empty">Не хватает продуктов для полных рецептов. Увеличьте бюджет.</p>';
+    return;
   }
+  available.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'recipe';
+    div.innerHTML = `<b>${r.name}</b>
+      <small>${r.text}</small>
+      <div class="ing">🧺 ${r.ingredients.join(', ')}</div>`;
+    box.appendChild(div);
+  });
+}
 
-  function save() {
-    localStorage.setItem('foodBudget', JSON.stringify({
-      products, budget,
-      shop: document.getElementById('shop').value
-    }));
-  }
-
-  function addProduct() {
-    const name = document.getElementById('p-name').value.trim();
-    const price = +document.getElementById('p-price').value;
-    const qty = document.getElementById('p-qty').value.trim();
-    if (!name || !price) return alert('Введите название и цену');
-    products.push({ name, price, qty });
-    document.getElementById('p-name').value = '';
-    document.getElementById('p-price').value = '';
-    document.getElementById('p-qty').value = '';
-    save();
-    render();
-  }
-
-  function removeProduct(i) {
-    products.splice(i, 1);
-    save();
-    render();
-  }
-
-  function render() {
-    // Список
-    const list = document.getElementById('list');
-    list.innerHTML = '';
-    products.forEach((p, i) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span>${p.name} ${p.qty ? '— ' + p.qty : ''}</span>
-        <span><b>${p.price} ₽</b>
-        <button class="danger" style="padding:4px 10px;font-size:13px;margin-left:8px"
-          onclick="removeProduct(${i})">✕</button></span>`;
-      list.appendChild(li);
-    });
-    document.getElementById('empty-msg').style.display = products.length ? 'none' : 'block';
-
-    // Бюджет
-    const spent = products.reduce((s, p) => s + p.price, 0);
-    const left = budget - spent;
-    const percent = budget ? Math.min(100, (spent / budget) * 100) : 0;
-
-    document.getElementById('s-budget').textContent = budget + ' ₽';
-    document.getElementById('s-spent').textContent = spent + ' ₽';
-    document.getElementById('s-left').textContent = left + ' ₽';
-    const bar = document.getElementById('bar');
-    bar.style.width = percent + '%';
-    bar.classList.toggle('over', spent > budget);
-
-    renderRecipes();
-  }
-
-  // Простые рецепты по ключевым словам
-  const RECIPES = [
-    { keys: ['курица','куриц','филе'], name: 'Курица с овощами', text: 'Обжарьте курицу, добавьте овощи, тушите 20 мин.' },
-    { keys: ['картош','картоф'], name: 'Жареная картошка', text: 'Нарежьте, обжарьте с луком до золотистой корочки.' },
-    { keys: ['макарон','паста','спагетт'], name: 'Паста с соусом', text: 'Отварите, добавьте томатный соус и сыр.' },
-    { keys: ['яйц','яйца'], name: 'Омлет', text: 'Взбейте яйца с молоком, обжарьте 5 мин.' },
-    { keys: ['рис'], name: 'Плов', text: 'Обжарьте мясо и морковь, добавьте рис и воду 1:2.' },
-    { keys: ['гречк','греча'], name: 'Гречка с грибами', text: 'Отварите гречку, обжарьте грибы с луком.' },
-    { keys: ['молок'], name: 'Молочная каша', text: 'Сварите крупу на молоке, добавьте сахар.' },
-    { keys: ['сыр'], name: 'Сырный суп', text: 'Обжарьте лук, добавьте бульон и плавленый сыр.' },
-    { keys: ['овощ','помидор','огур','перец','капуст'], name: 'Салат', text: 'Нарежьте овощи, заправьте маслом.' },
-    { keys: ['фарш'], name: 'Котлеты', text: 'Смешайте фарш с луком и яйцом, обжарьте.' },
-    { keys: ['хлеб','батон'], name: 'Гренки', text: 'Обжарьте хлеб на масле, посыпьте сыром.' },
-    { keys: ['рыб','минтай','треск'], name: 'Рыба в духовке', text: 'Посолите, поперчите, запекайте 25 мин при 200°C.' },
-  ];
-
-  function renderRecipes() {
-    const box = document.getElementById('recipes');
-    box.innerHTML = '';
-    if (!products.length) {
-      box.innerHTML = '<p class="empty">Добавьте продукты — появятся идеи рецептов.</p>';
-      return;
-    }
-    const names = products.map(p => p.name.toLowerCase());
-    const found = RECIPES.filter(r =>
-      names.some(n => r.keys.some(k => n.includes(k)))
-    );
-    if (!found.length) {
-      box.innerHTML = '<p class="empty">Пока нет совпадений. Добавьте крупы, мясо, овощи, яйца.</p>';
-      return;
-    }
-    found.forEach(r => {
-      const div = document.createElement('div');
-      div.className = 'recipe';
-      div.innerHTML = `<b>${r.name}</b><small>${r.text}</small>`;
-      box.appendChild(div);
-    });
-  }
+// Автозапуск при открытии
+generate();
+</script>
+</body>
+</html>
 
   load();
 </script>
